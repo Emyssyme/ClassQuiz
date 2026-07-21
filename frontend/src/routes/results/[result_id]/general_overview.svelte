@@ -38,7 +38,7 @@ SPDX-License-Identifier: MPL-2.0
 				title,
 				date: new Date(timestamp).toLocaleString(),
 				player_count: usernames.length,
-				average_score: get_average_final_score()
+				average_score: get_average_final_score().toFixed(0)
 			})}
 		</p>
 	</div>

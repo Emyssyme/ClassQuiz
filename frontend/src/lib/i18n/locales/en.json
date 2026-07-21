@@ -357,7 +357,7 @@
         "date_played": "Date Played",
         "player_count": "Player count",
         "general_overview": {
-            "sentence": "The quiz \"{{title}}\", which was played on {{date}} had {{player_count}} players with an average score of {{average_score}}."
+            "sentence": "The quiz \"<b>{{title}}</b>\", which was played on <b>{{date}}</b> had <b>{{player_count}}</b> players with an average score of <b>{{average_score}}</b>."
         }
     },
     "result_page": {

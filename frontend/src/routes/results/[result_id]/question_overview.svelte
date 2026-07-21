@@ -73,7 +73,7 @@ SPDX-License-Identifier: MPL-2.0
 						{@const correct_answers = get_number_of_correct_answers(i)}
 						<p class="text-center text-sm my-auto">
 							{$t('result_page.average_score', {
-								average_score: get_average_score(i)
+								average_score: get_average_score(i).toFixed(0)
 							})}
 						</p>
 						<p class="text-center text-sm my-auto">
