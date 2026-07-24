@@ -409,7 +409,7 @@
             "your_backup_code": "El teu codi de recolzament",
             "save_somewhere_save": "Resguarda-ho en un lloc segur!"
         },
-        "totp": "",
+        "totp": "TOTP",
         "totp_unavailable": "TOTP no està disponible",
         "2fa_activated": "L'autenticació de dos factors està activa",
         "webauthn": "Webauthn",
@@ -472,7 +472,7 @@
         "donate": "Feu una donació"
     },
     "editor_page": {
-        "add_an_answer": "",
+        "add_an_answer": "Afegeix una resposta",
         "right_click_to_delete": "Clica amb el botó dret sobre una resposta per eliminar-la!"
     },
     "public_user_page": {
