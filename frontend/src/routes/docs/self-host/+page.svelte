@@ -42,9 +42,6 @@ SPDX-License-Identifier: MPL-2.0
 			>)
 		</li>
 		<li><a href="https://git-scm.com/" target="_blank">Git</a></li>
-		<li>
-			A <a href="https://redis.com" target="_blank">Redis</a>-Server
-		</li>
 	</ul>
 	<h3>3rd-Parties</h3>
 	<h4>Optional</h4>
