@@ -1,1 +1,146 @@
-{}
+{
+    "index_page": {
+        "slogan": "د پرانیستي سرچینې د ازموینې پلاتفورم!",
+        "meta": {
+            "description": "ClassQuiz د پوښتنو او ازموینو یو اپلیکیشن دی، چې د زده‌کوونکو لپاره د متقابلې زده‌کړې په موخه جوړ شوی دی. پدې اپلیکیشن کې سرچینې پرانیستې دي او کارول یې وړیا دي",
+            "title": "کور"
+        },
+        "stats": "همدا اوس په ClassQuiz کې {{user_count}} کاروونکي او {{quiz_count}} ازموینې موجودې دي.",
+        "see_what_true_and_false": "وګورئ، چې کوم ځوابونه سم یا ناسم وو",
+        "see_how_many_true_and_false": "وګورئ، چې څو ځوابونه سم یا ناسم وو",
+        "create_or_import": "جوړول یا واردول",
+        "see_all_quizzes": "خپلې ازموینې وګورئ",
+        "teachers_site": "د ښوونکي سایټ",
+        "students_site": "د زده‌کوونکي سایټ",
+        "no_tracking": "له څارنې پرته",
+        "self_hostable": "په شخصي سرور کې د نصب وړ",
+        "german_server": "د آلمان سرور",
+        "user_friendly": "د کاروونکي لپاره اسانه",
+        "completely_free": "په بشپړه توګه وړیا",
+        "quiz_results_downloadable": "د ازموینې پایلې ډاونلوډ کېدای شي",
+        "multilingual": "څو ژبي",
+        "dark_mode": "تیاره حالت",
+        "get_a_quiz": "۱. د یوې ازموینې ترلاسه کول",
+        "create_a_quiz_from_scratch": "د اېډېټر په کارولو سره یوه ازموینه له پیل څخه جوړ کړئ او انځورونه او نور توکي هم پکې شامل کړئ",
+        "find_or_explore": "هغه ازموینې ومومئ (یا وپلټئ)، چې د نورو خلکو له خوا جوړ یا وارد شوي دي",
+        "play_quiz": "۲. ازموینه ترسره کړئ",
+        "select_answer": "ځواب وټاکئ",
+        "choose_answer_wisely": "خپل ځواب په غور سره وټاکئ",
+        "view_results": "پایلې وګورئ",
+        "check_if_chosen_wisely": "وګورئ، چې آیا تاسو سم انتخاب کړی دی",
+        "list_winners": "د ګټونکو لېست",
+        "get_ranking_and_winners": "درجه‌بندي ترلاسه کړئ او وګورئ چې څوک ګټونکي شوي دي",
+        "why_classquiz": "ولې ClassQuiz؟",
+        "no_tracking_content": "نور ستاسې څارنه کوي او دا معلومات له درېیمو اړخونو سره شریکوي، خو ClassQuiz داسې نه کوي.",
+        "self_hostable_content": "ClassQuiz په اسانۍ او خپلواکه توګه ساتل کېدای شي، نو معلومات یوازې ستاسو تر کنټرول لاندې پاتې کېږي!",
+        "user_friendly_content": "د ClassQuiz موخه دا ده چې ساده وي، تر څو هر څوک وکولای شي ګټه ترې واخلي.",
+        "completely_free_content": "ClassQuiz په بشپړه توګه وړیا دی (د کاروونکي لپاره)، هېڅ ډول تادیه شوي پلانونه او یا د ارتقا پاڼې ته د ځورونکو لېږدونې نلري. مرستې او بسپنې مو ډېره ستایل کېږي.",
+        "quiz_results_downloadable_content": "د ازمونیو پایلې په اسانۍ سره د Excel فایل په بڼه وړاندې کېدای شي. (زه نه پوهېدم، چې نور دا کار نه شي کولای.)",
+        "multilingual_content": "ClassQuiz په انګلیسي، فرانسوي، جرمني، ایټالوي، ناروېژي بوکمال، ترکي ژبو کې او همدارنګه تر یوه حده په اندونیزیايي او کاتالاني ژبو کې شتون لري.",
+        "dark_mode_content": "یوه له مهمو ځانګړنو څخه ده، چې یوه ویپاڼه یې لرلی شي!",
+        "german_server_content": "د ClassQuiz سرورونه په جرمني کې موقعیت لري او د netcup لخوا کوربه توب کېږي.",
+        "download_quizzes": "د ازموینو ډاونلوډ کول",
+        "download_quizzes_content": "ازموینې په یوه فایل کې ډاونلوډ کېدای شي او هر وخت بېرته واردېدای شي. دا اسانتیا تاسو ته دا اجازه هم درکوي، چې خپلې ازموینې د ClassQuiz نورو بېلګو (instances) ته انتقال کړئ.",
+        "community_driven": "د ټولنې پر بنسټ",
+        "community_driven_content": "ClassQuiz د تمویل، د نظرونو د ازمېښت، د نویو ځانګړنو د وړاندیزونو، ژباړو او نورو برخو لپاره په خپلې ټولنې تکیه کوي! تاسو هم کولی شئ د ClassQuiz د ټولنې یوه برخه شئ!",
+        "how_does_classquiz_work": "ClassQuiz څنګه کار کوي؟",
+        "no_player_limit": "د ګډونوالو په شمېر کې هېڅ محدودیت نشته",
+        "no_player_limit_content": "Class Quiz د ګډونوالو د شمېر لپاره مصنوعي محدودیت نه لري. په نظري ډول، له ۱۰۰۰ څخه زیات ګډونوال کولی شي په یوه ازموینه کې یوځای ګډون وکړي، خو دا سیستم د هرې ازموینې لپاره تر ۳۰۰ ګډونوالو پورې ازمایل شوی دی.",
+        "import_quiz_from_kahoot_and_edit": "ازموینې له Kahoot! څخه واردې کړئ او په ClassQuiz کې یې سمونه (ایډیټ) وکړئ"
+    },
+    "overview_page": {
+        "created_at": "جوړ شوی په",
+        "question_count": "د پوښتنو شمېر",
+        "no_quizzes": "د پیل کولو لپاره، د «جوړول» تڼۍ کېکاږئ، یا یوه ازموینه وارده کړئ."
+    },
+    "edit_page": {
+        "success_update_title": "ازموینه اپډیټ شوه.",
+        "success_update_body": "Nobody will expect the inquizition."
+    },
+    "create_page": {
+        "success": {
+            "title": "ازموینه جوړه شوه.",
+            "body": "لوبې دې پیل شي."
+        }
+    },
+    "register_page": {
+        "greeting": "له تاسو سره په پېژندګلوي خوشحاله شوم!",
+        "create_account": "حساب جوړول",
+        "forgot_password?": "خپل پټ نوم مو هېر کړی دی؟",
+        "already_have_account?": "ایا مخکې مو حساب جوړ کړی دی؟"
+    },
+    "login_page": {
+        "welcome_back": "بیا ښه راغلاست.",
+        "login_or_create_account": "حساب ته ننوتل یا نوی حساب جوړول",
+        "already_have_account": "حساب نه لرئ؟",
+        "email_or_username": "برېښنالیک یا کارن‌نوم",
+        "modal": {
+            "success": {
+                "success_check_mail": "تاسو ننوتلي یاست. خپل د برېښنالیک صندوق وګورئ.",
+                "success": "تاسو ننوتلي یاست.",
+                "description": {
+                    "success_check_mail": "مهرباني وکړئ خپل د برېښنالیک صندوق وګورئ. تاسو به یو برښنالیک ترلاسه کړئ، چې پکې یو لینک وي؛ په هغه لینک کلیک کولو سره کولی شئ دننه شئ.",
+                    "success": "تاسو ننوتلي یاست."
+                }
+            },
+            "error": {
+                "wrong_creds": "د برېښنالیک پته یا پټ نوم ناسم دی.",
+                "unexpected": "ناڅاپي تېروتنه!",
+                "description": {
+                    "wrong_creds": "مهرباني وکړئ ځان ډاډه کړئ، چې ستاسو پټ نوم او د برېښنالیک پته سمه ده.",
+                    "unexpected": "هماغه پخوانۍ ناڅاپي تېروتنه بیا رامنځته شوه!"
+                }
+            }
+        },
+        "use_backup_code": "د احتیاطي کوډ کارول"
+    },
+    "words": {
+        "question": "پوښتنه",
+        "answer": "ځواب",
+        "stats": "احصایې",
+        "features": "ځانګړتیاوې",
+        "login": "ننوتل",
+        "email": "د برېښنالیک پته",
+        "username": "کارن‌نوم",
+        "password": "پټ نوم",
+        "play": "پیل",
+        "edit": "سمون",
+        "delete": "ړنګول",
+        "public": "عمومي",
+        "start": "پیل",
+        "create": "جوړول",
+        "import": "واردول",
+        "logout": "له حساب څخه وتل",
+        "title": "سرلیک",
+        "url": "د انټرنېټ پته",
+        "submit": "لېږل",
+        "connect": "نښلول",
+        "pin": "پېن",
+        "kick": "ایستل",
+        "register": "نوم‌لیکنه",
+        "docs": "سندونه",
+        "close": "تړل",
+        "save": "ساتل",
+        "description": "سپړنه",
+        "image": "انځور",
+        "settings": "تنظیمات",
+        "repeat_password": "د پټ نوم بیا تکرارول",
+        "overview": "لنډه کتنه",
+        "report": "راپور",
+        "explore": "پلټل",
+        "search": "لټون",
+        "screenshot": "سکرین شاټ",
+        "screenshot_plural": "سکرین‌شاټونه",
+        "browser": "براوزر",
+        "view": "لیدل",
+        "view_plural": "لیدنې",
+        "correct": "سم",
+        "result": "پایله",
+        "result_plural": "پایلې",
+        "count": "شمېر",
+        "range": "حد",
+        "multiple_choice": "څو-انتخابي",
+        "private": "شخصي",
+        "dashboard": "ډشبورډ"
+    }
+}
