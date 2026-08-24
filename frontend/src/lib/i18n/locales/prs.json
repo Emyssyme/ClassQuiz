@@ -298,6 +298,193 @@
         "join_description": "در {{url}} وارد شوید و {{pin}} را وارد کنید.",
         "join_by_entering_code": "با وارد کردن کد زیر وارد شوید",
         "points_added": "امتیازها اضافه شدند",
-        "your_place": "شما در مقام {{place}} هستید!"
+        "your_place": "شما در مقام {{place}} هستید!",
+        "players_waiting": "{{count}} شرکت‌کننده در انتظار است",
+        "players_waiting_plural": "{{count}} شرکت‌کنندگان در انتظار هستند"
+    },
+    "editor_page": {
+        "add_an_answer": "یک پاسخ اضافه کنید",
+        "right_click_to_delete": "برای حذف یک پاسخ، روی آن راست‌کلیک کنید!"
+    },
+    "dashboard": {
+        "search_for_own_quizzes": "آزمون‌های خود را جستجو کنید",
+        "views_n_plays": "بازدیدها و اجراها",
+        "info_analytics": "«Plays» فقط نشان می‌دهد که آزمون چند بار شروع شده است (شما هم در این شمارش شامل هستید)، در حالی که «Views» نشان می‌دهد صفحهٔ «View» چند بار بازدید شده است؛ بنابراین بازدیدهای ربات‌ها (Bots) را نیز شامل می‌شود. بابت این موضوع متأسفم.",
+        "commandpalette_notice": "برای باز کردن فهرست فرمان‌ها (Command Palette)، <kbd>Ctrl</kbd>+<kbd>K</kbd> یا <kbd>Meta</kbd>+<kbd>K</kbd> را فشار دهید",
+        "create_quiz": "یک کوییز جدید ایجاد کنید"
+    },
+    "footer": {
+        "self_ads": "با ❤️ توسط {{mawoka_link}} و با کمک {{others_link}} ساخته شده است.",
+        "more_details_here": "جزئیات بیشتر در اینجا",
+        "donate": "اگر این مطلب را مفید یافتید، لطفاً در صورت امکان {{donate_link}} را در نظر بگیرید."
+    },
+    "error_page": {
+        "404_text": "صفحه‌ای که به دنبال آن بودید، دیگر وجود ندارد یا شاید اصلاً وجود نداشته است. چه کسی می‌داند؟",
+        "unknown_error_text": "این نباید اتفاق می‌افتاد. احتمالاً تقصیر من است، نه شما؛ اما شاید شما یک قدرت جادویی برای خراب کردن چیزها دارید..."
+    },
+    "uploader": {
+        "add_image": "افزودن رسانه",
+        "select_upload_type": "نوع آپلود را انتخاب کنید",
+        "upload_a_video": "ویدیو را آپلود کنید",
+        "upload_video_popup_notice": "پنجرهٔ بازشو باز است؛ برای اطلاعات بیشتر آن را مشاهده کنید",
+        "upload_video": "آپلود ویدیو",
+        "visit_pixabay": "از Pixabay دیدن کنید",
+        "images_by_pixabay": "تصاویر توسط Pixabay ارائه شده‌اند",
+        "search_english_only": "جستجو فقط به زبان انگلیسی کار می‌کند",
+        "next_page": "صفحهٔ بعدی",
+        "previous_page": "صفحهٔ قبلی"
+    },
+    "avatar_settings": {
+        "skin_color": "رنگ پوست",
+        "top_type": "بالا",
+        "hair_color": "رنگ مو",
+        "facial_hair_type": "موی صورت",
+        "facial_hair_color": "رنگ موی صورت",
+        "mouth_type": "دهان",
+        "eyebrow_type": "ابرو",
+        "accessories_type": "عینک",
+        "hat_color": "رنگ کلاه",
+        "clothe_type": "لباس",
+        "clothe_color": "رنگ لباس",
+        "clothe_graphic_type": "گرافیک",
+        "thats_you": "این شما هستید!",
+        "start_over": "از نو شروع کنید",
+        "go_back": "برگشتن"
+    },
+    "results_page": {
+        "no_results_so_far": "تا هنوز هیچ نتیجه‌ای ذخیره نشده است...",
+        "quiz_title": "عنوان آزمون",
+        "date_played": "تاریخ بازی",
+        "player_count": "تعداد شرکت‌کنندگان",
+        "general_overview": {
+            "sentence": "آزمون «{{title}}» که در تاریخ {{date}} انجام شده بود، {{player_count}} شرکت‌کننده داشت و میانگین امتیاز آن {{average_score}} بود."
+        }
+    },
+    "result_page": {
+        "player_name": "نام شرکت‌کننده",
+        "custom_field": "بخش سفارشی",
+        "average_score": "میانگین امتیاز: {{average_score}}",
+        "correct_answer": "{{count}} پاسخ درست",
+        "correct_answer_plural": "{{count}} پاسخ‌های درست",
+        "time_taken": "زمان صرف‌شده",
+        "player_score": "امتیاز شرکت‌کننده",
+        "player_correct_questions": "پاسخ‌های درست"
+    },
+    "controllers": {
+        "add_new_controller": "کنترل‌کنندهٔ جدید اضافه کنید",
+        "player_name": "نام شرکت‌کننده",
+        "first_seen": "اولین مشاهده",
+        "last_seen": "آخرین مشاهده",
+        "controller_name": "نام کنترل‌کننده",
+        "version_overview": "جدیدترین نسخه موجود {{newest_version}} است و نسخهٔ {{current_version}} نصب شده است.",
+        "already_latest_version": "شما هم‌اکنون از آخرین نسخه استفاده می‌کنید",
+        "cancel_update": "لغو به‌روزرسانی!",
+        "update_from_to": "به‌روزرسانی از نسخهٔ {{current_version}} به نسخهٔ {{newest_version}}"
+    },
+    "navbar": {
+        "donate": "کمک مالی"
+    },
+    "security_settings": {
+        "backup_code": "کد پشتیبان",
+        "get_backup_code": "دریافت کد پشتیبان",
+        "activate_2fa": "احراز هویت دومرحله‌ای را فعال کنید",
+        "2fa_activated": "احراز هویت دومرحله‌ای فعال است",
+        "2fa_deactivated": "احراز هویت دومرحله‌ای غیرفعال است",
+        "webauthn": "احراز هویت وب",
+        "webauthn_available": "احراز هویت وب در دسترس است",
+        "webauthn_unavailable": "احراز هویت وب در دسترس نیست",
+        "add_security_key": "کلید امنیتی اضافه کنید",
+        "totp": "رمز عبور یک‌بارمصرف مبتنی بر زمان",
+        "totp_available": "رمز عبور یک‌بارمصرف مبتنی بر زمان در دسترس است",
+        "totp_unavailable": "رمز عبور یک‌بارمصرف مبتنی بر زمان در دسترس نیست",
+        "disable_totp": "رمز عبور یک‌بارمصرف مبتنی بر زمان را غیرفعال کنید",
+        "enable_totp": "رمز عبور یک‌بارمصرف مبتنی بر زمان را فعال کنید",
+        "backup_codes": {
+            "your_backup_code": "کد پشتیبان شما",
+            "save_somewhere_save": "این را در یک جای امن ذخیره کنید!",
+            "download_code": "کد را دانلود کنید"
+        },
+        "totp_setup": {
+            "scan_to_set_up": "برای تنظیم کد، این کد QR را اسکن کنید",
+            "enter_as_secret_if_no_see_code": "اگر نمی‌توانید کد QR را اسکن کنید، این را به‌عنوان کد محرمانه وارد کنید",
+            "totp_setup": "تنظیم رمز عبور یک‌بارمصرف مبتنی بر زمان",
+            "do_not_forget_backup_code": "فراموش نکنید که کد بازیابی خود را ذخیره کنید!"
+        }
+    },
+    "view_quiz_page": {
+        "made_by": "ساخته‌شده توسط",
+        "view_on_kahoot": "مشاهده در نسخهٔ اصلی"
+    },
+    "start_game": {
+        "captcha_message": "اگر فعال باشد، ReCaptcha گوگل در مرورگر شرکت‌کننده بارگذاری می‌شود. فقط در صورتی آن را فعال کنید که واقعاً به آن نیاز دارید، زیرا برای بارگذاری ReCaptcha باید رضایت هر شرکت‌کننده را داشته باشید.",
+        "normal_mode_description": "سؤال و پاسخ فقط در صفحهٔ مدیر نمایش داده می‌شود. بازیکنان فقط دکمه‌های رنگی با نمادهایی خواهند داشت که با نمادهای روی صفحهٔ مدیر مطابقت دارند.",
+        "old_school_mode": "مکتب قدیمی",
+        "old_school_mode_description": "سؤال‌ها و تصاویر هم در صفحهٔ مدیر و هم در صفحهٔ شرکت‌کننده‌گان نمایش داده می‌شوند",
+        "start_game": "بازی را شروع کنید"
+    },
+    "quiztivity": {
+        "editor": {
+            "select_page_type": "نوع صفحه را انتخاب کنید",
+            "move_left": "به چپ منتقل کنید",
+            "move_right": "به راست منتقل کنید",
+            "title_placeholder": "عنوان را اینجا وارد کنید",
+            "add_new": "افزودن جدید",
+            "delete": "حذف",
+            "open_shares_menu": "فهرست اشتراک‌گذاری را باز کنید",
+            "shares": {
+                "add_new_share": "اشتراک‌گذاری جدید اضافه کنید",
+                "expires_on": "در تاریخ {{date}} انقضاء می‌شود",
+                "never_expires": "هرگز انقضاء نمی‌شود"
+            }
+        },
+        "memory": {
+            "editor": {
+                "add_card": "کارت اضافه کنید",
+                "upload_image": "تصویر را آپلود کنید",
+                "add_pair": "جفت اضافه کنید"
+            }
+        },
+        "play": {
+            "memory": {
+                "try_count": "تلاش‌ها: {{try_count}}"
+            }
+        },
+        "share_expired": "اشتراک‌گذاری انقضاء شده است"
+    },
+    "components": {
+        "popover": {
+            "copied_to_clipboard": "در کلیپ‌بورد کاپی شد!"
+        }
+    },
+    "public_user_page": {
+        "joined_on": "در تاریخ {{date}} پیوست",
+        "no_original_quizzes": "این کاربر هیچ آزمون اصلی ندارد",
+        "user_not_found": "کاربر پیدا نشد"
+    },
+    "file_dashboard": {
+        "not_available": "در دسترس نیست",
+        "missing": "مفقود!",
+        "unset": "تنظیم‌نشده",
+        "size": "اندازه: {{size}} مگابایت",
+        "caption": "عنوان: {{caption}}",
+        "filename": "نام فایل: {{filename}}",
+        "uploaded": "آپلود شده: {{date}}",
+        "imported": "وارد شده: {{yes_or_no}}",
+        "edit_details": "جزئیات را ویرایش کنید",
+        "delete_image": "تصویر را حذف کنید",
+        "edit_the_image": "تصویر را ویرایش کنید",
+        "filename_word": "نام فایل",
+        "alt_text": "متن جایگزین",
+        "storage_usage": "شما {{used}} MiB از مجموع {{total}} MiB فضای ذخیره‌سازی خود را استفاده کرده‌اید. این مقدار برابر با {{percent}}٪ از فضای ذخیره‌سازی شما است."
+    },
+    "video_uploader": {
+        "time_elapsed": "زمان سپری‌شده",
+        "time_remaining": "زمان باقی‌مانده"
+    },
+    "downloader": {
+        "select_download_type": "نوع دانلود را انتخاب کنید",
+        "own_format": "فرمت خودتان",
+        "excel_format": "فرمت اکسل",
+        "help": "فرمت اختصاصی (.cqa) شامل تصاویر نیز می‌شود و از تمام انواع سؤال پشتیبانی می‌کند، در حالی که فرمت Excel فقط از سؤال‌های رأی‌گیری و چندگزینه‌ای پشتیبانی می‌کند."
     }
 }
