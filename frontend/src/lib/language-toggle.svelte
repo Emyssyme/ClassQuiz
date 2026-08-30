@@ -111,6 +111,11 @@ SPDX-License-Identifier: MPL-2.0
 				code: 'ja',
 				flag: '🇯🇵',
 				name: 'Japan'
+			},
+			{
+				code: 'he',
+				flag: '🇯🇵',
+				name: 'Hebrew'
 			}
 		]
 	}: Props = $props();
