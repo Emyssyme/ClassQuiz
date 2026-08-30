@@ -33,8 +33,11 @@ SPDX-License-Identifier: MPL-2.0
 		}
 	}
 	let start_language = 'en';
+	const rtl_languages = ['he', 'prs', 'ps'];
 	if (browser) {
 		start_language = localStorage.getItem('language') ?? 'en';
+		document.documentElement.lang = start_language;
+		document.documentElement.dir = rtl_languages.includes(start_language) ? 'rtl' : 'ltr';
 	}
 	initLocalizationContext(start_language);
 </script>

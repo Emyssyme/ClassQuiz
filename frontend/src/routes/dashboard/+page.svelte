@@ -216,7 +216,7 @@ SPDX-License-Identifier: MPL-2.0
 								</p>
 							</div>
 							<div
-								class="grid grid-rows-2 ml-auto gap-2 w-fit self-end my-auto"
+								class="grid grid-rows-2 ms-auto gap-2 w-fit self-end my-auto"
 								class:grid-cols-3={quiz.type === 'quiz'}
 								class:grid-cols-2={quiz.type !== 'quiztivity'}
 							>

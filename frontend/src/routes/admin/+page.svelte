@@ -313,5 +313,5 @@ SPDX-License-Identifier: MPL-2.0
 	target="_blank"
 	bind:this={dataexport_download_a}
 	download=""
-	class="absolute -top-3/4 -left-3/4 opacity-0">Download</a
+	class="absolute size-px overflow-hidden whitespace-nowrap opacity-0">Download</a
 >

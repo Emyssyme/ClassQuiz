@@ -116,6 +116,16 @@ SPDX-License-Identifier: MPL-2.0
 				code: 'he',
 				flag: '🇯🇵',
 				name: 'Hebrew'
+			},
+			{
+				code: 'prs',
+				flag: '🇦🇫',
+				name: 'دری (Dari)'
+			},
+			{
+				code: 'ps',
+				flag: '🇦🇫',
+				name: "Pax̌tó"
 			}
 		]
 	}: Props = $props();
