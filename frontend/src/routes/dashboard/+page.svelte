@@ -71,6 +71,35 @@ SPDX-License-Identifier: MPL-2.0
 		const res = fuse.search(search_term);
 		items_to_show = res.map((r) => r.item);
 	};
+	let active_assignments: Array<any> = $state([]);
+
+	const fetchActiveAssignments = async () => {
+		try {
+			const res = await fetch('/api/v1/quiz/assign/list');
+			if (res.ok) {
+				active_assignments = await res.json();
+			}
+		} catch (e) {
+			console.error('Failed to load active assignments', e);
+		}
+	};
+
+	const copyAssignLink = (pin: string) => {
+		const url = `${window.location.origin}/play/selfpaced?pin=${pin}`;
+		navigator.clipboard.writeText(url);
+		alert('Link copiat în clipboard!');
+	};
+
+	const endAssign = async (pin: string) => {
+		if (!confirm('Sigur doriți să încheiați acest assignment?')) return;
+		try {
+			await fetch(`/api/v1/quiz/assign/${pin}`, { method: 'DELETE' });
+			await fetchActiveAssignments();
+		} catch (e) {
+			alert('Eroare la ștergere');
+		}
+	};
+
 	onMount(async () => {
 		const { items, fuse: f } = await getData();
 		all_items = items;
@@ -84,6 +113,7 @@ SPDX-License-Identifier: MPL-2.0
 		}
 		search_term;
 		search();
+		fetchActiveAssignments();
 	});
 
 	const deleteQuiz = async (to_delete: string, type: 'quiz' | 'quiztivity') => {
@@ -157,6 +187,54 @@ SPDX-License-Identifier: MPL-2.0
 					</BrownButton>
 				</div>
 			</div>
+			{#if active_assignments && active_assignments.length > 0}
+				<div class="mx-4 mt-6 bg-gray-800/90 border border-purple-500/40 rounded-xl p-5 shadow-lg">
+					<div class="flex items-center justify-between mb-4">
+						<div class="flex items-center gap-2">
+							<span class="text-2xl">🕐</span>
+							<h2 class="text-xl font-bold text-white">Teme în Derulare ({active_assignments.length})</h2>
+							<span class="bg-purple-500/20 text-purple-300 text-xs px-2.5 py-0.5 rounded-full font-bold">
+								Self-Paced Active
+							</span>
+						</div>
+					</div>
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						{#each active_assignments as a}
+							<div class="bg-gray-900/80 border border-gray-700/80 rounded-xl p-4 flex flex-col justify-between hover:border-purple-500/60 transition-all shadow">
+								<div>
+									<div class="flex items-start justify-between gap-2">
+										<h3 class="font-bold text-white text-lg truncate">{@html a.title}</h3>
+										<span class="font-mono text-xs bg-purple-900/50 text-purple-300 px-2 py-1 rounded font-bold">
+											PIN: {a.game_pin}
+										</span>
+									</div>
+									<p class="text-xs text-gray-400 mt-1">
+										📅 Deadline: {a.deadline ? new Date(a.deadline).toLocaleDateString() + ' ' + new Date(a.deadline).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Fără limită'}
+									</p>
+									<div class="mt-3 flex items-center justify-between text-xs text-gray-300">
+										<span>Elevi înscriși: <strong class="text-white">{a.total_players}</strong></span>
+										<span>Finalizat: <strong class="text-green-400">{a.finished_players}</strong></span>
+									</div>
+									<div class="w-full bg-gray-700 rounded-full h-2 mt-1.5">
+										<div class="bg-gradient-to-r from-purple-500 to-green-400 h-2 rounded-full transition-all" style="width: {a.total_players > 0 ? (a.finished_players / a.total_players) * 100 : 0}%"></div>
+									</div>
+								</div>
+								<div class="flex items-center gap-2 mt-4 pt-3 border-t border-gray-800">
+									<a href="/admin/assign?pin={a.game_pin}" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-center py-2 px-3 rounded-lg text-xs font-bold transition-all shadow">
+										📊 Monitorizează
+									</a>
+									<button onclick={() => copyAssignLink(a.game_pin)} class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-3 rounded-lg text-xs font-bold transition-all" title="Copiază link-ul pentru elevi">
+										📋
+									</button>
+									<button onclick={() => endAssign(a.game_pin)} class="bg-red-900/40 hover:bg-red-700 text-red-300 py-2 px-3 rounded-lg text-xs font-bold transition-all" title="Încheie assignment">
+										🗑️
+									</button>
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
 			{#if all_items.length !== 0}
 				<div class="flex justify-center pt-4 w-full">
 					<div>

@@ -212,6 +212,7 @@ async def assign_quiz(
     )
     await redis.set(f"game:{str(game.game_pin)}", game.model_dump_json(), ex=ttl_seconds)
     await redis.set(f"game_pin:{user.id}:{quiz_id}", game_pin, ex=ttl_seconds)
+    await redis.sadd(f"user_assignments:{user.id}", str(game_pin))
 
     return {
         "game_pin": str(game_pin),
@@ -222,9 +223,44 @@ async def assign_quiz(
     }
 
 
+@router.get("/assign/list")
+async def list_user_assignments(user: User = Depends(get_current_user)):
+    """List all active assignments created by the current user."""
+    pins = await redis.smembers(f"user_assignments:{user.id}")
+    assignments = []
+    for pin in pins:
+        game_raw = await redis.get(f"game:{pin}")
+        if game_raw is None:
+            await redis.srem(f"user_assignments:{user.id}", pin)
+            continue
+        try:
+            game_data = PlayGame.model_validate_json(game_raw)
+        except Exception:
+            continue
+
+        total_players = await redis.scard(f"game_session:{pin}:players")
+        finished_players = await redis.scard(f"game_session:{pin}:sp:finished")
+
+        assignments.append({
+            "game_pin": pin,
+            "game_id": str(game_data.game_id),
+            "quiz_id": str(game_data.quiz_id),
+            "title": game_data.title,
+            "description": game_data.description,
+            "cover_image": game_data.cover_image,
+            "deadline": game_data.deadline,
+            "timer_enabled": game_data.timer_enabled,
+            "question_count": len(game_data.questions),
+            "total_players": total_players,
+            "finished_players": finished_players,
+        })
+    assignments.sort(key=lambda x: x["deadline"] or "")
+    return assignments
+
+
 @router.get("/assign/{game_pin}/status")
 async def get_assign_status(game_pin: str, user: User = Depends(get_current_user)):
-    """Get real-time status of a self-paced assignment for the admin dashboard."""
+    """Get real-time status of a self-paced assignment including intermediate results for the admin dashboard."""
     redis_res = await redis.get(f"game:{game_pin}")
     if redis_res is None:
         raise HTTPException(status_code=404, detail="assignment not found")
@@ -238,7 +274,10 @@ async def get_assign_status(game_pin: str, user: User = Depends(get_current_user
     players_raw = await redis.smembers(f"game_session:{game_pin}:players")
     players = []
     for p in players_raw:
-        players.append(json.loads(p))
+        try:
+            players.append(json.loads(p))
+        except Exception:
+            pass
 
     # Get scores
     scores_raw = await redis.hgetall(f"game_session:{game_pin}:player_scores")
@@ -250,28 +289,114 @@ async def get_assign_status(game_pin: str, user: User = Depends(get_current_user
     finished_raw = await redis.smembers(f"game_session:{game_pin}:sp:finished")
     finished = list(finished_raw) if finished_raw else []
 
-    # Build per-player status
+    # Get detailed answers per question
+    questions_summary = []
+    question_stats = []
+    answers_by_q = {}
+
+    for i, q in enumerate(game_data.questions):
+        questions_summary.append({
+            "index": i,
+            "question": q.question,
+            "type": q.type,
+            "time": q.time,
+            "image": q.image,
+        })
+
+        raw_ans = await redis.get(f"game_session:{game_pin}:{i}")
+        ans_list = []
+        if raw_ans:
+            try:
+                ans_list = json.loads(raw_ans)
+            except Exception:
+                ans_list = []
+        answers_by_q[i] = ans_list
+
+        correct_count = sum(1 for a in ans_list if a.get("right"))
+        wrong_count = len(ans_list) - correct_count
+        accuracy = round((correct_count / len(ans_list) * 100)) if ans_list else 0
+
+        question_stats.append({
+            "index": i,
+            "question": q.question,
+            "type": q.type,
+            "total_answered": len(ans_list),
+            "correct_count": correct_count,
+            "wrong_count": wrong_count,
+            "accuracy": accuracy,
+            "answers": ans_list,
+        })
+
+    # Build per-player status with intermediate answers matrix
     player_status = []
     for p in players:
         username = p["username"]
         current_q = await redis.get(f"game_session:{game_pin}:sp:{username}:current_q")
+
+        player_answers = {}
+        for i in range(len(game_data.questions)):
+            for a in answers_by_q.get(i, []):
+                if a.get("username") == username:
+                    player_answers[str(i)] = {
+                        "right": a.get("right"),
+                        "answer": a.get("answer"),
+                        "score": a.get("score"),
+                    }
+                    break
+
         player_status.append({
             "username": username,
             "score": scores.get(username, 0),
             "current_question": int(current_q) if current_q else 0,
             "finished": username in finished,
+            "answers": player_answers,
         })
     player_status.sort(key=lambda x: x["score"], reverse=True)
 
     return {
         "game_pin": game_pin,
+        "game_id": str(game_data.game_id),
+        "quiz_id": str(game_data.quiz_id),
         "title": game_data.title,
+        "description": game_data.description,
         "deadline": game_data.deadline,
+        "timer_enabled": game_data.timer_enabled,
         "question_count": len(game_data.questions),
         "total_players": len(players),
         "finished_count": len(finished),
+        "questions": questions_summary,
+        "question_stats": question_stats,
         "players": player_status,
     }
+
+
+@router.post("/assign/{game_pin}/save")
+async def save_assign_results(game_pin: str, user: User = Depends(get_current_user)):
+    """Save assignment results to permanent GameResults storage."""
+    redis_res = await redis.get(f"game:{game_pin}")
+    if redis_res is None:
+        raise HTTPException(status_code=404, detail="assignment not found")
+    game_data = PlayGame.model_validate_json(redis_res)
+    if game_data.user_id != user.id:
+        raise HTTPException(status_code=403, detail="not your assignment")
+
+    from classquiz.socket_server.export_helpers import save_quiz_to_storage
+
+    await save_quiz_to_storage(game_pin)
+    return {"status": "saved"}
+
+
+@router.delete("/assign/{game_pin}")
+async def delete_assignment(game_pin: str, user: User = Depends(get_current_user)):
+    """Delete an assignment and remove from active list."""
+    redis_res = await redis.get(f"game:{game_pin}")
+    if redis_res is not None:
+        game_data = PlayGame.model_validate_json(redis_res)
+        if game_data.user_id != user.id:
+            raise HTTPException(status_code=403, detail="not your assignment")
+        await redis.delete(f"game:{game_pin}")
+    await redis.srem(f"user_assignments:{user.id}", game_pin)
+    return {"status": "deleted"}
 
 
 class CheckIfCaptchaEnabledResponse(BaseModel):

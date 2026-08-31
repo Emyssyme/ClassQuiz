@@ -75,7 +75,7 @@ def calculate_score(z: float, t: int) -> int:
     return int(res * 1000)
 
 
-async def set_answer(answers, game_pin: str, q_index: int, data: AnswerData) -> AnswerDataList:
+async def set_answer(answers, game_pin: str, q_index: int, data: AnswerData, ex: int = 7200) -> AnswerDataList:
     if answers is None:
         answers = AnswerDataList([data])
     else:
@@ -84,7 +84,7 @@ async def set_answer(answers, game_pin: str, q_index: int, data: AnswerData) -> 
     await redis.set(
         f"game_session:{game_pin}:{q_index}",
         answers.model_dump_json(),
-        ex=7200,
+        ex=ex,
     )
     return answers
 
@@ -604,6 +604,7 @@ async def sp_submit_answer(sid: str, data: dict):
         game_pin=game_pin,
         data=answer_data,
         q_index=question_index,
+        ex=2592000,
     )
 
     # Build correct answer for immediate feedback
