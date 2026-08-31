@@ -374,13 +374,7 @@ SPDX-License-Identifier: MPL-2.0
 									<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
 										{#each q.answers as ans}
 											<div
-												class="p-2.5 rounded-lg text-xs flex items-center justify-between border"
-												class:bg-green-950/30={ans.right}
-												class:border-green-800/50={ans.right}
-												class:text-green-200={ans.right}
-												class:bg-red-950/30={!ans.right}
-												class:border-red-800/50={!ans.right}
-												class:text-red-200={!ans.right}
+												class="p-2.5 rounded-lg text-xs flex items-center justify-between border {ans.right ? 'bg-green-950/30 border-green-800/50 text-green-200' : 'bg-red-950/30 border-red-800/50 text-red-200'}"
 											>
 												<span class="font-bold">{ans.username}:</span>
 												<span class="truncate ml-1">{ans.answer || '(fără răspuns)'}</span>
