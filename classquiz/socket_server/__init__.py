@@ -699,6 +699,12 @@ async def sp_finish(sid: str, _data: dict):
             my_rank = i + 1
             my_score = entry["score"]
             break
+    # Auto-save current results to database so they show up in /results
+    try:
+        await save_quiz_to_storage(game_pin)
+    except Exception as e:
+        print("Error saving results on sp_finish:", e)
+
     await sio.emit(
         "sp_final_results",
         {

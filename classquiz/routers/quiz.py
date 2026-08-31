@@ -388,12 +388,19 @@ async def save_assign_results(game_pin: str, user: User = Depends(get_current_us
 
 @router.delete("/assign/{game_pin}")
 async def delete_assignment(game_pin: str, user: User = Depends(get_current_user)):
-    """Delete an assignment and remove from active list."""
+    """Delete an assignment and remove from active list, auto-saving results to database first."""
     redis_res = await redis.get(f"game:{game_pin}")
     if redis_res is not None:
         game_data = PlayGame.model_validate_json(redis_res)
         if game_data.user_id != user.id:
             raise HTTPException(status_code=403, detail="not your assignment")
+        
+        from classquiz.socket_server.export_helpers import save_quiz_to_storage
+        try:
+            await save_quiz_to_storage(game_pin)
+        except Exception as e:
+            print("Error auto-saving results on delete:", e)
+
         await redis.delete(f"game:{game_pin}")
     await redis.srem(f"user_assignments:{user.id}", game_pin)
     return {"status": "deleted"}
