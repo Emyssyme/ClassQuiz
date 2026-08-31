@@ -185,6 +185,21 @@ async def join_game(sid: str, data: dict):
                 # ABCD, TEXT, CHECK — strip "right" from answers
                 clean_answers = [{"answer": a["answer"], "color": a.get("color")} for a in q_data["answers"]] if isinstance(q_data["answers"], list) else q_data["answers"]
                 sp_questions.append({"index": i, "type": q.type, "question": q_data["question"], "time": q_data["time"], "image": q_data.get("image"), "answers": clean_answers})
+        
+        # Get players who already played / current scores
+        scores_raw = await redis.hgetall(f"game_session:{data.game_pin}:player_scores")
+        finished_raw = await redis.smembers(f"game_session:{data.game_pin}:sp:finished")
+        finished_set = set(finished_raw) if finished_raw else set()
+
+        existing_players = []
+        for u, sc in scores_raw.items():
+            existing_players.append({
+                "username": u,
+                "score": int(sc),
+                "finished": u in finished_set
+            })
+        existing_players.sort(key=lambda x: x["score"], reverse=True)
+
         await sio.emit(
             "self_paced_start",
             {
@@ -199,6 +214,7 @@ async def join_game(sid: str, data: dict):
                 "questions": sp_questions,
                 "timer_enabled": game_data.timer_enabled,
                 "deadline": game_data.deadline,
+                "leaderboard": existing_players,
             },
             room=sid,
         )

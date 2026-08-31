@@ -34,6 +34,7 @@ SPDX-License-Identifier: MPL-2.0
 	let answerSubmitted = $state(false);
 	let lastResult: any = $state(null);
 	let leaderboard: any = $state(null);
+	let initialLeaderboard: any[] = $state([]);
 	let finalResults: any = $state(null);
 	let bg_color = $derived(gameData ? gameData.background_color : undefined);
 
@@ -46,6 +47,7 @@ SPDX-License-Identifier: MPL-2.0
 		gameData = data;
 		questions = data.questions;
 		timerEnabled = data.timer_enabled;
+		initialLeaderboard = data.leaderboard || [];
 		phase = 'title';
 	});
 
@@ -216,34 +218,72 @@ SPDX-License-Identifier: MPL-2.0
 
 	<!-- TITLE PHASE -->
 	{:else if phase === 'title'}
-		<div class="flex flex-col justify-center items-center w-screen h-screen gap-6 p-8">
-			<h1 class="text-5xl font-bold text-center">{@html gameData.title}</h1>
-			<p class="text-xl text-center text-gray-300">{@html gameData.description}</p>
+		<div class="flex flex-col justify-center items-center w-screen min-h-screen gap-5 p-6 max-w-2xl mx-auto">
+			<h1 class="text-4xl md:text-5xl font-bold text-center">{@html gameData.title}</h1>
+			{#if gameData.description}
+				<p class="text-lg text-center text-gray-300">{@html gameData.description}</p>
+			{/if}
 			{#if gameData.cover_image}
 				<img
 					src="/api/v1/storage/download/{gameData.cover_image}"
 					alt="Quiz cover"
-					class="max-h-[30vh] rounded-lg shadow-lg"
+					class="max-h-[22vh] rounded-lg shadow-lg"
 				/>
 			{/if}
-			<div class="flex flex-col items-center gap-2 mt-4">
-				<p class="text-lg">{questions.length} questions</p>
+			<div class="flex flex-wrap justify-center gap-4 text-sm text-gray-300">
+				<span class="bg-gray-800/80 px-3 py-1.5 rounded-full border border-gray-700">
+					📝 {questions.length} întrebări
+				</span>
 				{#if timerEnabled}
-					<p class="text-sm text-gray-400">⏱️ Timed questions</p>
+					<span class="bg-gray-800/80 px-3 py-1.5 rounded-full border border-gray-700">
+						⏱️ Cu cronometru
+					</span>
 				{:else}
-					<p class="text-sm text-gray-400">📝 No time limit</p>
+					<span class="bg-gray-800/80 px-3 py-1.5 rounded-full border border-gray-700">
+						📝 Fără limită de timp
+					</span>
 				{/if}
 				{#if gameData.deadline}
-					<p class="text-sm text-gray-400">
-						📅 Deadline: {new Date(gameData.deadline).toLocaleString()}
-					</p>
+					<span class="bg-gray-800/80 px-3 py-1.5 rounded-full border border-gray-700">
+						📅 Deadline: {new Date(gameData.deadline).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+					</span>
 				{/if}
 			</div>
+
+			<!-- Jucători care au parcurs deja testul -->
+			{#if initialLeaderboard && initialLeaderboard.length > 0}
+				<div class="w-full bg-gray-800/90 border border-purple-500/40 rounded-xl p-4 shadow mt-1">
+					<p class="text-xs font-bold uppercase tracking-wider text-purple-300 mb-2">
+						🏆 Clasament actual ({initialLeaderboard.length} {initialLeaderboard.length === 1 ? 'jucător' : 'jucători'}):
+					</p>
+					<div class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+						{#each initialLeaderboard as p, i}
+							<div class="flex items-center justify-between text-sm bg-gray-900/60 px-3 py-1.5 rounded-lg border border-gray-700/50">
+								<div class="flex items-center gap-2">
+									<span class="font-mono text-xs text-gray-400 w-5">
+										{#if i === 0}🥇{:else if i === 1}🥈{:else if i === 2}🥉{:else}#{i + 1}{/if}
+									</span>
+									<span class="font-bold text-white">{p.username}</span>
+									{#if p.finished}
+										<span class="text-[10px] bg-green-900/60 text-green-300 px-1.5 py-0.2 rounded font-bold">finalizat</span>
+									{/if}
+								</div>
+								<span class="font-mono font-bold text-purple-300">{p.score} pct</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{:else}
+				<p class="text-sm text-gray-400 italic bg-gray-800/40 px-4 py-2 rounded-full">
+					⭐ Fii primul care parcurge acest test!
+				</p>
+			{/if}
+
 			<button
-				class="mt-6 bg-purple-600 hover:bg-purple-500 text-white px-8 py-4 rounded-xl text-2xl font-bold shadow-lg transition-all hover:scale-105"
+				class="mt-2 bg-purple-600 hover:bg-purple-500 text-white px-8 py-3.5 rounded-xl text-xl font-bold shadow-lg transition-all hover:scale-105"
 				onclick={startQuiz}
 			>
-				Start Quiz →
+				Începe Testul →
 			</button>
 		</div>
 
@@ -477,13 +517,6 @@ SPDX-License-Identifier: MPL-2.0
 					</div>
 				{/each}
 			</div>
-
-			<a
-				href="/play"
-				class="mt-6 bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-xl text-lg font-bold shadow transition-all"
-			>
-				Back to Home
-			</a>
 		</div>
 	{/if}
 </div>
