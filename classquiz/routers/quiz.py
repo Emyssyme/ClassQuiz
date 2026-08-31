@@ -7,7 +7,7 @@ import json
 import random
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from random import randint
 
 import ormar.exceptions
@@ -167,7 +167,7 @@ async def assign_quiz(
         deadline_dt = datetime.fromisoformat(deadline)
     except ValueError:
         raise HTTPException(status_code=400, detail="invalid deadline format, use ISO 8601")
-    ttl_seconds = int((deadline_dt - datetime.now()).total_seconds())
+    ttl_seconds = int((deadline_dt - datetime.now(timezone.utc)).total_seconds())
     if ttl_seconds <= 0:
         raise HTTPException(status_code=400, detail="deadline must be in the future")
     # Cap TTL at 30 days
