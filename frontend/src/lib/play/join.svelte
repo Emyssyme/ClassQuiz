@@ -89,6 +89,11 @@ SPDX-License-Identifier: MPL-2.0
 		if (res.status === 200) {
 			captcha_enabled = json.enabled;
 			custom_field = json.custom_field;
+			// Redirect self-paced games to their dedicated page
+			if (game_mode === 'self_paced') {
+				window.location.assign(`/play/selfpaced?pin=${game_pin}`);
+				return;
+			}
 		}
 		if (res.status === 404) {
 			/*			alertModal.set({

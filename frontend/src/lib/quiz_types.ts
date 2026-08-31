@@ -25,6 +25,8 @@ export interface QuizData {
 	dislikes: number;
 	plays: number;
 	views: number;
+	self_paced?: boolean;
+	game_mode?: string;
 }
 
 export enum QuizQuestionType {

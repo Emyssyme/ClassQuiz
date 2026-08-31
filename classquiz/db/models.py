@@ -251,6 +251,9 @@ class PlayGame(BaseModel):
     background_image: str | None = None
     custom_field: str | None = None
     question_show: bool = False
+    self_paced: bool = False
+    deadline: str | None = None  # ISO timestamp
+    timer_enabled: bool = True
 
     @classmethod
     async def get_from_redis(self, game_pin: str) -> Self:

@@ -66,3 +66,13 @@ class KickPlayerInput(BaseModel):
 
 class ConnectSessionIdEvent(BaseModel):
     session_id: str
+
+
+class SPGetQuestionData(BaseModel):
+    question_index: int
+
+
+class SPSubmitAnswerData(BaseModel):
+    question_index: int
+    answer: str | int
+    complex_answer: list[SubmitAnswerDataOrderType] | None = None

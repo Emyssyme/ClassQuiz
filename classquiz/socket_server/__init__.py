@@ -38,6 +38,8 @@ from .models import (
     RegisterAsAdminData,
     KickPlayerInput,
     ConnectSessionIdEvent,
+    SPGetQuestionData,
+    SPSubmitAnswerData,
 )
 
 from classquiz.socket_server.export_helpers import save_quiz_to_storage
@@ -142,7 +144,8 @@ async def join_game(sid: str, data: dict):
         print(e)
         return
     game_data = PlayGame.model_validate_json(redis_res)
-    if game_data.started:
+    # Self-paced games are always "started" — skip the started check
+    if not game_data.self_paced and game_data.started:
         await sio.emit("game_already_started", room=sid)
         return
     # +++ START checking captcha +++
@@ -162,11 +165,50 @@ async def join_game(sid: str, data: dict):
         "admin": False,
     }
     await save_session(sid, sio, session)
-    await sio.emit(
-        "joined_game",
-        game_data.to_player_data(),
-        room=sid,
-    )
+
+    if game_data.self_paced:
+        # For self-paced: send all question metadata (without correct answers) immediately
+        sp_questions = []
+        for i, q in enumerate(game_data.questions):
+            q_data = q.model_dump()
+            if q.type == QuizQuestionType.SLIDE:
+                sp_questions.append({"index": i, "type": q.type, "question": q_data["question"], "time": q_data["time"], "image": q_data.get("image"), "answers": q_data["answers"]})
+            elif q.type == QuizQuestionType.VOTING:
+                sp_questions.append({"index": i, "type": q.type, "question": q_data["question"], "time": q_data["time"], "image": q_data.get("image"), "answers": [{"answer": a["answer"], "color": a.get("color"), "image": a.get("image")} for a in q_data["answers"]]})
+            elif q.type == QuizQuestionType.RANGE:
+                sp_questions.append({"index": i, "type": q.type, "question": q_data["question"], "time": q_data["time"], "image": q_data.get("image"), "answers": {"min": q_data["answers"]["min"], "max": q_data["answers"]["max"]}})
+            elif q.type == QuizQuestionType.ORDER:
+                answers_shuffled = [{"answer": a["answer"], "color": a.get("color")} for a in q_data["answers"]]
+                random.shuffle(answers_shuffled)
+                sp_questions.append({"index": i, "type": q.type, "question": q_data["question"], "time": q_data["time"], "image": q_data.get("image"), "answers": answers_shuffled})
+            else:
+                # ABCD, TEXT, CHECK — strip "right" from answers
+                clean_answers = [{"answer": a["answer"], "color": a.get("color")} for a in q_data["answers"]] if isinstance(q_data["answers"], list) else q_data["answers"]
+                sp_questions.append({"index": i, "type": q.type, "question": q_data["question"], "time": q_data["time"], "image": q_data.get("image"), "answers": clean_answers})
+        await sio.emit(
+            "self_paced_start",
+            {
+                "title": game_data.title,
+                "description": game_data.description,
+                "cover_image": game_data.cover_image,
+                "background_color": game_data.background_color,
+                "background_image": game_data.background_image,
+                "game_pin": data.game_pin,
+                "game_id": str(game_data.game_id),
+                "question_count": len(game_data.questions),
+                "questions": sp_questions,
+                "timer_enabled": game_data.timer_enabled,
+                "deadline": game_data.deadline,
+            },
+            room=sid,
+        )
+    else:
+        await sio.emit(
+            "joined_game",
+            game_data.to_player_data(),
+            room=sid,
+        )
+
     await redis.set(f"game_session:{data.game_pin}:players:{data.username}", sid, ex=7200)
     await GamePlayer(username=data.username, sid=sid).to_player_stack(data.game_pin)
 
@@ -451,6 +493,204 @@ async def set_control_visibility(sid: str, data: dict):
         "control_visibility",
         {"visible": data.visible},
         room=f"admin:{session['game_pin']}",
+    )
+
+
+# ============================================================
+# Self-Paced (Assign) events
+# ============================================================
+
+
+@sio.event
+async def sp_get_question(sid: str, data: dict):
+    """Self-paced: player requests a specific question by index."""
+    try:
+        data = SPGetQuestionData(**data)
+    except ValidationError as e:
+        await sio.emit("error", room=sid)
+        print(e)
+        return
+    session = await get_session(sid, sio)
+    game_data = await PlayGame.get_from_redis(session["game_pin"])
+    if not game_data.self_paced:
+        await sio.emit("error", room=sid)
+        return
+    q_index = data.question_index
+    if q_index < 0 or q_index >= len(game_data.questions):
+        await sio.emit("error", room=sid)
+        return
+    # Record the time the player started this question (for scoring)
+    await redis.set(
+        f"game_session:{session['game_pin']}:sp:{session['username']}:current_time",
+        datetime.now().isoformat(),
+        ex=7200,
+    )
+    await redis.set(
+        f"game_session:{session['game_pin']}:sp:{session['username']}:current_q",
+        str(q_index),
+        ex=7200,
+    )
+    await sio.emit("sp_question_ready", {"question_index": q_index}, room=sid)
+
+
+@sio.event
+async def sp_submit_answer(sid: str, data: dict):
+    """Self-paced: player submits an answer. Gets immediate feedback."""
+    now = datetime.now()
+    try:
+        data = SPSubmitAnswerData(**data)
+    except ValidationError as e:
+        await sio.emit("error", room=sid)
+        print(e)
+        return
+    data.answer = str(data.answer)
+    session = await get_session(sid, sio)
+    game_pin = session["game_pin"]
+    game_data = await PlayGame.get_from_redis(game_pin)
+    if not game_data.self_paced:
+        await sio.emit("error", room=sid)
+        return
+    question_index = int(float(data.question_index))
+    if question_index < 0 or question_index >= len(game_data.questions):
+        await sio.emit("error", room=sid)
+        return
+
+    # Check if already answered this question
+    already_answered = await has_already_answered(game_pin, question_index, session["username"])
+    if already_answered:
+        await sio.emit("already_replied", room=sid)
+        return
+
+    # Build a SubmitAnswerData-compatible object for check_answer
+    submit_data = SubmitAnswerData(
+        question_index=data.question_index,
+        answer=data.answer,
+        complex_answer=data.complex_answer,
+    )
+    answer_right, answer = check_answer(game_data, submit_data)
+
+    # Calculate score using individual timer
+    score = 0
+    if game_data.timer_enabled:
+        time_key = f"game_session:{game_pin}:sp:{session['username']}:current_time"
+        time_q_started_str = await redis.get(time_key)
+        if time_q_started_str:
+            time_q_started = datetime.fromisoformat(time_q_started_str)
+            diff = (time_q_started - now).total_seconds() * 1000
+            latency = int(float(session.get("ping", 0)))
+            if answer_right:
+                score = calculate_score(
+                    abs(diff) - latency,
+                    int(float(game_data.questions[question_index].time)),
+                )
+                if score > 1000:
+                    score = 1000
+    else:
+        # No timer — fixed score for correct answers
+        if answer_right:
+            score = 1000
+
+    await redis.hincrby(f"game_session:{game_pin}:player_scores", session["username"], score)
+    answer_data = AnswerData(
+        username=session["username"],
+        answer=answer,
+        right=answer_right,
+        time_taken=0,
+        score=score,
+    )
+    answers = await redis.get(f"game_session:{game_pin}:{data.question_index}")
+    await set_answer(
+        answers,
+        game_pin=game_pin,
+        data=answer_data,
+        q_index=question_index,
+    )
+
+    # Build correct answer for immediate feedback
+    q = game_data.questions[question_index]
+    correct_answer = None
+    if q.type == QuizQuestionType.ABCD or q.type == QuizQuestionType.CHECK:
+        correct_answer = [a.model_dump() for a in q.answers if a.right]
+    elif q.type == QuizQuestionType.RANGE:
+        correct_answer = {"min_correct": q.answers.min_correct, "max_correct": q.answers.max_correct}
+    elif q.type == QuizQuestionType.TEXT:
+        correct_answer = [a.model_dump() for a in q.answers]
+    elif q.type == QuizQuestionType.ORDER:
+        correct_answer = [a.model_dump() for a in q.answers]
+
+    await sio.emit(
+        "sp_answer_result",
+        {
+            "question_index": question_index,
+            "right": answer_right,
+            "score": score,
+            "correct_answer": correct_answer,
+        },
+        room=sid,
+    )
+
+
+@sio.event
+async def sp_get_leaderboard(sid: str, _data: dict):
+    """Self-paced: player requests the current leaderboard."""
+    session = await get_session(sid, sio)
+    game_pin = session["game_pin"]
+    scores_raw = await redis.hgetall(f"game_session:{game_pin}:player_scores")
+    all_scores = []
+    for username, sc in scores_raw.items():
+        all_scores.append({"username": username, "score": int(sc)})
+    all_scores.sort(key=lambda x: x["score"], reverse=True)
+
+    # Find current player's rank
+    my_rank = -1
+    my_score = 0
+    for i, entry in enumerate(all_scores):
+        if entry["username"] == session["username"]:
+            my_rank = i + 1
+            my_score = entry["score"]
+            break
+
+    await sio.emit(
+        "sp_leaderboard",
+        {
+            "top": all_scores[:5],
+            "my_rank": my_rank,
+            "my_score": my_score,
+            "total_players": len(all_scores),
+        },
+        room=sid,
+    )
+
+
+@sio.event
+async def sp_finish(sid: str, _data: dict):
+    """Self-paced: player has finished all questions."""
+    session = await get_session(sid, sio)
+    game_pin = session["game_pin"]
+    # Mark player as finished
+    await redis.sadd(f"game_session:{game_pin}:sp:finished", session["username"])
+    # Return full leaderboard
+    scores_raw = await redis.hgetall(f"game_session:{game_pin}:player_scores")
+    all_scores = []
+    for username, sc in scores_raw.items():
+        all_scores.append({"username": username, "score": int(sc)})
+    all_scores.sort(key=lambda x: x["score"], reverse=True)
+    my_rank = -1
+    my_score = 0
+    for i, entry in enumerate(all_scores):
+        if entry["username"] == session["username"]:
+            my_rank = i + 1
+            my_score = entry["score"]
+            break
+    await sio.emit(
+        "sp_final_results",
+        {
+            "leaderboard": all_scores,
+            "my_rank": my_rank,
+            "my_score": my_score,
+            "total_players": len(all_scores),
+        },
+        room=sid,
     )
 
 

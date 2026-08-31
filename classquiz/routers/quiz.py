@@ -141,6 +141,139 @@ async def start_quiz(
     return {**quiz.model_dump(exclude={"id"}), **game.model_dump(exclude={"questions"}), "cqc_code": code}
 
 
+@router.post("/assign/{quiz_id}")
+async def assign_quiz(
+    quiz_id: str,
+    deadline: str,
+    timer_enabled: bool = True,
+    captcha_enabled: bool = False,
+    custom_field: str | None = None,
+    randomize_answers: bool = False,
+    user: User = Depends(get_current_user),
+):
+    """Create a self-paced (assign) game. Players can join and play at their own pace until the deadline."""
+    try:
+        quiz_id = uuid.UUID(quiz_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="badly formed quiz id")
+    quiz = await Quiz.objects.get_or_none(id=quiz_id, user_id=user.id)
+    if quiz is None:
+        quiz = await Quiz.objects.get_or_none(id=quiz_id, public=True)
+        if quiz is None:
+            return JSONResponse(status_code=404, content={"detail": "quiz not found"})
+
+    # Parse deadline and calculate TTL
+    try:
+        deadline_dt = datetime.fromisoformat(deadline)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="invalid deadline format, use ISO 8601")
+    ttl_seconds = int((deadline_dt - datetime.now()).total_seconds())
+    if ttl_seconds <= 0:
+        raise HTTPException(status_code=400, detail="deadline must be in the future")
+    # Cap TTL at 30 days
+    ttl_seconds = min(ttl_seconds, 30 * 24 * 3600)
+
+    quiz.plays += 1
+    await quiz.update()
+    game_pin = randint(100000, 999999)
+    if custom_field == "":
+        custom_field = None
+    game = await redis.get(f"game:{game_pin}")
+    while game is not None:
+        game_pin = randint(100000, 999999)
+        game = await redis.get(f"game:{game_pin}")
+
+    if randomize_answers:
+        for question in quiz.questions:
+            if question["type"] == QuizQuestionType.RANGE:
+                continue
+            if question["type"] == QuizQuestionType.SLIDE:
+                continue
+            random.shuffle(question["answers"])
+
+    game = PlayGame(
+        quiz_id=quiz_id,
+        game_pin=str(game_pin),
+        questions=quiz.questions,
+        game_id=uuid.uuid4(),
+        title=quiz.title,
+        description=quiz.description,
+        captcha_enabled=captcha_enabled,
+        cover_image=quiz.cover_image,
+        game_mode="self_paced",
+        user_id=user.id,
+        background_color=quiz.background_color,
+        custom_field=custom_field,
+        background_image=quiz.background_image,
+        self_paced=True,
+        started=True,  # Self-paced games are always "started"
+        deadline=deadline,
+        timer_enabled=timer_enabled,
+    )
+    await redis.set(f"game:{str(game.game_pin)}", game.model_dump_json(), ex=ttl_seconds)
+    await redis.set(f"game_pin:{user.id}:{quiz_id}", game_pin, ex=ttl_seconds)
+
+    return {
+        "game_pin": str(game_pin),
+        "game_id": str(game.game_id),
+        "deadline": deadline,
+        "title": quiz.title,
+        "quiz_id": str(quiz_id),
+    }
+
+
+@router.get("/assign/{game_pin}/status")
+async def get_assign_status(game_pin: str, user: User = Depends(get_current_user)):
+    """Get real-time status of a self-paced assignment for the admin dashboard."""
+    redis_res = await redis.get(f"game:{game_pin}")
+    if redis_res is None:
+        raise HTTPException(status_code=404, detail="assignment not found")
+    game_data = PlayGame.model_validate_json(redis_res)
+    if game_data.user_id != user.id:
+        raise HTTPException(status_code=403, detail="not your assignment")
+    if not game_data.self_paced:
+        raise HTTPException(status_code=400, detail="this is not a self-paced game")
+
+    # Get players
+    players_raw = await redis.smembers(f"game_session:{game_pin}:players")
+    players = []
+    for p in players_raw:
+        players.append(json.loads(p))
+
+    # Get scores
+    scores_raw = await redis.hgetall(f"game_session:{game_pin}:player_scores")
+    scores = {}
+    for username, sc in scores_raw.items():
+        scores[username] = int(sc)
+
+    # Get finished players
+    finished_raw = await redis.smembers(f"game_session:{game_pin}:sp:finished")
+    finished = list(finished_raw) if finished_raw else []
+
+    # Build per-player status
+    player_status = []
+    for p in players:
+        username = p["username"]
+        current_q = await redis.get(f"game_session:{game_pin}:sp:{username}:current_q")
+        player_status.append({
+            "username": username,
+            "score": scores.get(username, 0),
+            "current_question": int(current_q) if current_q else 0,
+            "finished": username in finished,
+        })
+    player_status.sort(key=lambda x: x["score"], reverse=True)
+
+    return {
+        "game_pin": game_pin,
+        "title": game_data.title,
+        "deadline": game_data.deadline,
+        "question_count": len(game_data.questions),
+        "total_players": len(players),
+        "finished_count": len(finished),
+        "players": player_status,
+    }
+
+
 class CheckIfCaptchaEnabledResponse(BaseModel):
     enabled: bool
     game_mode: str | None = None
