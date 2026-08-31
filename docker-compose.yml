@@ -17,7 +17,9 @@ services:
       REDIS_URL: redis://redis:6379/0?decode_responses=True
       API_URL: http://api:80
   api:
-    image: ghcr.io/mawoka-myblock/classquiz-backend:master
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: &restart always
     depends_on: &depends
       - db
@@ -92,19 +94,23 @@ services:
     volumes:
       - data:/var/lib/postgresql/data
   proxy:
-    image: ghcr.io/mawoka-myblock/classquiz-caddy:master
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
     restart: always
     ports:
-      - "8000:8080" # The 8000 can be changed.
+      - "5005:8080"
   meilisearch:
-    image: getmeili/meilisearch:v0.28.0
+    image: getmeili/meilisearch:v1.7
     restart: always
     environment:
       MEILI_NO_ANALYTICS: "true"
     volumes:
       - meilisearch-data:/data.ms
   worker:
-    image: ghcr.io/mawoka-myblock/classquiz-backend:master
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment: *env_vars
     depends_on: *depends
     restart: *restart
