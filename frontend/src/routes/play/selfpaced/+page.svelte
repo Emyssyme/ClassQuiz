@@ -52,17 +52,16 @@ SPDX-License-Identifier: MPL-2.0
 	});
 
 	socket.on('game_not_found', () => {
-		alert('Game not found');
+		alert('Jocul nu a fost găsit sau a expirat.');
 		game_pin = '';
 		phase = 'join';
 	});
 
 	socket.on('username_already_exists', () => {
-		alert('Username already taken!');
+		alert('Acest nume este deja utilizat! Alege alt nume.');
 	});
 
 	socket.on('sp_question_ready', (_data) => {
-		// Timer was set server-side; start local countdown
 		if (timerEnabled && questions[currentQuestionIndex]) {
 			timerValue = parseInt(questions[currentQuestionIndex].time);
 			startTimer();
@@ -88,7 +87,7 @@ SPDX-License-Identifier: MPL-2.0
 	});
 
 	socket.on('already_replied', () => {
-		alert('Already answered this question!');
+		alert('Ai răspuns deja la această întrebare!');
 	});
 
 	// --- Timer ---
@@ -98,7 +97,6 @@ SPDX-License-Identifier: MPL-2.0
 			timerValue--;
 			if (timerValue <= 0) {
 				clearTimer();
-				// Auto-submit empty if time ran out and not yet submitted
 				if (!answerSubmitted) {
 					submitAnswer('');
 				}
@@ -115,9 +113,9 @@ SPDX-License-Identifier: MPL-2.0
 
 	// --- Actions ---
 	function joinGame() {
-		if (username.length < 3 || game_pin.length < 6) return;
+		if (username.trim().length < 3 || game_pin.length < 6) return;
 		socket.emit('join_game', {
-			username,
+			username: username.trim(),
 			game_pin,
 			captcha: undefined,
 			custom_field: undefined
@@ -173,7 +171,7 @@ SPDX-License-Identifier: MPL-2.0
 
 <svelte:window onbeforeunload={confirmUnload} />
 <svelte:head>
-	<title>ClassQuiz - Self-Paced</title>
+	<title>ClassQuiz - Test în Ritm Propriu</title>
 </svelte:head>
 
 <div
@@ -183,17 +181,17 @@ SPDX-License-Identifier: MPL-2.0
 >
 	<!-- JOIN PHASE -->
 	{#if phase === 'join'}
-		<div class="flex flex-col justify-center items-center w-screen h-screen gap-6">
+		<div class="flex flex-col justify-center items-center w-screen h-screen gap-6 p-4">
 			{#if game_pin === '' || game_pin.length < 6}
 				<form class="flex flex-col items-center gap-3">
-					<h1 class="text-2xl font-bold">🕐 Self-Paced Quiz</h1>
-					<p class="text-gray-400 text-sm">Enter the game PIN to start</p>
+					<h1 class="text-2xl font-bold">🕐 Test în Ritm Propriu</h1>
+					<p class="text-gray-400 text-sm">Introdu codul PIN al testului</p>
 					<input
 						class="border border-gray-400 text-center text-black ring-0 outline-hidden p-3 rounded-lg focus:shadow-2xl transition-all text-xl w-64"
 						bind:value={game_pin}
 						maxlength="6"
 						inputmode="numeric"
-						placeholder="Game PIN"
+						placeholder="PIN Joc"
 					/>
 				</form>
 			{:else}
@@ -201,16 +199,16 @@ SPDX-License-Identifier: MPL-2.0
 					onsubmit={(e) => { e.preventDefault(); joinGame(); }}
 					class="flex flex-col items-center gap-3"
 				>
-					<h1 class="text-2xl font-bold">🕐 Self-Paced Quiz</h1>
-					<p class="text-gray-400 text-sm">PIN: <span class="font-mono font-bold">{game_pin}</span></p>
+					<h1 class="text-2xl font-bold">🕐 Test în Ritm Propriu</h1>
+					<p class="text-gray-400 text-sm">PIN: <span class="font-mono font-bold text-purple-400">{game_pin}</span></p>
 					<input
 						class="border border-gray-400 text-center text-black ring-0 outline-hidden p-3 rounded-lg focus:shadow-2xl transition-all text-xl w-64"
 						bind:value={username}
 						maxlength="17"
-						placeholder="Your name"
+						placeholder="Numele tău"
 					/>
-					<BrownButton disabled={username.length <= 3} onclick={joinGame}>
-						Join Quiz
+					<BrownButton disabled={username.trim().length < 3} onclick={joinGame}>
+						Alătură-te Testului
 					</BrownButton>
 				</form>
 			{/if}
@@ -226,7 +224,7 @@ SPDX-License-Identifier: MPL-2.0
 			{#if gameData.cover_image}
 				<img
 					src="/api/v1/storage/download/{gameData.cover_image}"
-					alt="Quiz cover"
+					alt="Copertă quiz"
 					class="max-h-[22vh] rounded-lg shadow-lg"
 				/>
 			{/if}
@@ -294,7 +292,7 @@ SPDX-License-Identifier: MPL-2.0
 			<!-- Header -->
 			<div class="flex justify-between items-center mb-4">
 				<span class="text-lg font-bold">
-					Question {currentQuestionIndex + 1} / {questions.length}
+					Întrebarea {currentQuestionIndex + 1} din {questions.length}
 				</span>
 				{#if timerEnabled && timerValue > 0}
 					<span
@@ -326,7 +324,7 @@ SPDX-License-Identifier: MPL-2.0
 					<div class="flex justify-center mt-4">
 						<img
 							src="/api/v1/storage/download/{q.image}"
-							alt="Question image"
+							alt="Imagine întrebare"
 							class="max-h-[25vh] rounded-lg"
 						/>
 					</div>
@@ -336,7 +334,7 @@ SPDX-License-Identifier: MPL-2.0
 			<!-- Answers -->
 			{#if q.type === 'RANGE'}
 				<div class="flex flex-col items-center gap-4 mt-auto mb-auto">
-					<p class="text-gray-400">Min: {q.answers.min} — Max: {q.answers.max}</p>
+					<p class="text-gray-400">Minim: {q.answers.min} — Maxim: {q.answers.max}</p>
 					<input
 						type="number"
 						class="border-2 border-gray-400 text-center text-black p-3 rounded-lg text-xl w-48"
@@ -349,7 +347,7 @@ SPDX-License-Identifier: MPL-2.0
 						disabled={answerSubmitted || selectedAnswer === null}
 						onclick={() => submitAnswer(selectedAnswer ?? '')}
 					>
-						{$t('words.submit')}
+						Trimite Răspunsul
 					</BrownButton>
 				</div>
 			{:else if q.type === 'SLIDE'}
@@ -361,7 +359,7 @@ SPDX-License-Identifier: MPL-2.0
 						class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-xl text-lg font-bold shadow transition-all"
 						onclick={nextQuestion}
 					>
-						Continue →
+						Continuă →
 					</button>
 				</div>
 			{:else}
@@ -389,23 +387,23 @@ SPDX-License-Identifier: MPL-2.0
 		<div class="flex flex-col justify-center items-center w-screen h-screen gap-6 p-8">
 			{#if lastResult.right}
 				<div class="text-8xl animate-bounce">✅</div>
-				<h2 class="text-4xl font-bold text-green-400">Correct!</h2>
+				<h2 class="text-4xl font-bold text-green-400">Corect!</h2>
 			{:else}
 				<div class="text-8xl">❌</div>
-				<h2 class="text-4xl font-bold text-red-400">Wrong</h2>
+				<h2 class="text-4xl font-bold text-red-400">Greșit</h2>
 			{/if}
-			<p class="text-2xl">
-				+{lastResult.score} points
+			<p class="text-2xl font-bold">
+				+{lastResult.score} puncte
 			</p>
 			{#if lastResult.correct_answer && !lastResult.right}
-				<div class="bg-gray-800 rounded-xl p-4 mt-2">
-					<p class="text-gray-400 text-sm mb-1">Correct answer:</p>
+				<div class="bg-gray-800 rounded-xl p-4 mt-2 max-w-md w-full text-center">
+					<p class="text-gray-400 text-sm mb-1">Răspunsul corect:</p>
 					{#if Array.isArray(lastResult.correct_answer)}
 						{#each lastResult.correct_answer as ca}
-							<p class="text-green-400 font-bold">{ca.answer}</p>
+							<p class="text-green-400 font-bold text-lg">{ca.answer}</p>
 						{/each}
 					{:else if lastResult.correct_answer.min_correct !== undefined}
-						<p class="text-green-400 font-bold">
+						<p class="text-green-400 font-bold text-lg">
 							{lastResult.correct_answer.min_correct} — {lastResult.correct_answer.max_correct}
 						</p>
 					{/if}
@@ -417,13 +415,13 @@ SPDX-License-Identifier: MPL-2.0
 					class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-xl text-lg font-bold shadow transition-all"
 					onclick={requestLeaderboard}
 				>
-					🏆 Leaderboard
+					🏆 Clasament
 				</button>
 				<button
 					class="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-xl text-lg font-bold shadow transition-all"
 					onclick={nextQuestion}
 				>
-					{currentQuestionIndex + 1 >= questions.length ? '🏁 Finish' : 'Next →'}
+					{currentQuestionIndex + 1 >= questions.length ? '🏁 Finalizează' : 'Următoarea întrebare →'}
 				</button>
 			</div>
 		</div>
@@ -431,7 +429,7 @@ SPDX-License-Identifier: MPL-2.0
 	<!-- LEADERBOARD PHASE -->
 	{:else if phase === 'leaderboard' && leaderboard}
 		<div class="flex flex-col justify-center items-center w-screen h-screen gap-4 p-8">
-			<h2 class="text-3xl font-bold mb-4">🏆 Leaderboard</h2>
+			<h2 class="text-3xl font-bold mb-4">🏆 Clasament</h2>
 
 			<div class="w-full max-w-lg">
 				{#each leaderboard.top as entry, i}
@@ -454,7 +452,7 @@ SPDX-License-Identifier: MPL-2.0
 								{entry.username}
 							</span>
 						</div>
-						<span class="font-mono font-bold">{entry.score}</span>
+						<span class="font-mono font-bold">{entry.score} pct</span>
 					</div>
 				{/each}
 			</div>
@@ -463,35 +461,37 @@ SPDX-License-Identifier: MPL-2.0
 				<div class="text-center mt-2 text-gray-400">
 					<p>···</p>
 					<p class="font-bold text-lg text-white">
-						#{leaderboard.my_rank} {username} — {leaderboard.my_score} pts
+						Locul #{leaderboard.my_rank} • {username} — {leaderboard.my_score} pct
 					</p>
 				</div>
 			{/if}
 
-			<p class="text-gray-400 text-sm mt-2">{leaderboard.total_players} players total</p>
+			<p class="text-gray-400 text-sm mt-2">
+				{leaderboard.total_players} {leaderboard.total_players === 1 ? 'jucător în total' : 'jucători în total'}
+			</p>
 
 			<button
 				class="mt-4 bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-xl text-lg font-bold shadow transition-all"
 				onclick={nextQuestion}
 			>
-				{currentQuestionIndex + 1 >= questions.length ? '🏁 Finish' : 'Next Question →'}
+				{currentQuestionIndex + 1 >= questions.length ? '🏁 Finalizează' : 'Următoarea întrebare →'}
 			</button>
 		</div>
 
 	<!-- FINISHED PHASE -->
 	{:else if phase === 'finished' && finalResults}
 		<div class="flex flex-col justify-center items-center w-screen min-h-screen gap-4 p-8">
-			<h1 class="text-4xl font-bold">🎉 Quiz Complete!</h1>
+			<h1 class="text-4xl font-bold">🎉 Test Finalizat!</h1>
 			<div class="text-center mt-2">
 				<p class="text-5xl font-bold text-purple-400">{finalResults.my_score}</p>
-				<p class="text-gray-400 mt-1">points</p>
+				<p class="text-gray-400 mt-1">puncte acumulate</p>
 			</div>
 			<p class="text-2xl mt-2">
-				Your rank: <span class="font-bold text-yellow-400">#{finalResults.my_rank}</span>
-				<span class="text-gray-400">/ {finalResults.total_players}</span>
+				Locul tău: <span class="font-bold text-yellow-400">#{finalResults.my_rank}</span>
+				<span class="text-gray-400">din {finalResults.total_players}</span>
 			</p>
 
-			<h2 class="text-2xl font-bold mt-6 mb-2">🏆 Final Leaderboard</h2>
+			<h2 class="text-2xl font-bold mt-6 mb-2">🏆 Clasament Final</h2>
 			<div class="w-full max-w-lg">
 				{#each finalResults.leaderboard as entry, i}
 					<div
@@ -513,7 +513,7 @@ SPDX-License-Identifier: MPL-2.0
 								{entry.username}
 							</span>
 						</div>
-						<span class="font-mono font-bold">{entry.score}</span>
+						<span class="font-mono font-bold">{entry.score} pct</span>
 					</div>
 				{/each}
 			</div>
